@@ -35,3 +35,7 @@ Wir rufen den angegebenen Link auf und suchen den Kurs mit der gegebenen Kursnum
 - [ ] Bei Kursvergabe Start, automatisch, schnell, wiederholt versuchen, einen Platz zu bekommen
 - [ ] Mehrere Kurse gleichzeitig buchen
 - [ ] Prevalidate user information
+- [ ] Improve README.md
+  - [ ] Setup instructions
+  - [ ] Committing to the project
+  - [ ] etc.
