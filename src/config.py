@@ -1,3 +1,5 @@
+AUTOSUBMIT = False # Set to True to automatically submit the form after filling it out
+
 LINK = "https://buchsys-hsp.ifss.kit.edu/angebote/aktueller_zeitraum/_Judo.html"
 KURSNUMMER = "3700"
 

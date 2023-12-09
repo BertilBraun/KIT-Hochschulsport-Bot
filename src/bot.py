@@ -1,10 +1,7 @@
 import time
-import cv2
-import numpy as np
-import pytesseract
-from PIL import Image
-from io import BytesIO
 import base64
+from tkinter.tix import AUTO
+from PIL import Image
 from io import BytesIO
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -112,9 +109,13 @@ print(f"CAPTCHA-Text: {captcha_text}")
 captcha_input_field = driver.find_element(By.ID, "BS_F_captcha")
 captcha_input_field.send_keys(captcha_text.strip())
 
+# repeatedly check if captcha has 6 characters entered, then submit
+while len(captcha_input_field.get_attribute("value")) != 6:
+    time.sleep(0.1)
 
 submit_button = driver.find_element(By.XPATH, "//input[@type='submit'][@value='kostenpflichtig buchen']")
-# TODO activate submit_button.click()
+if AUTOSUBMIT:
+    submit_button.click()
 
 time.sleep(1000)
 # Schließen des Browsers
