@@ -2,8 +2,6 @@ selenium
 beautifulsoup4
 requests
 webdriver_manager
-pytesseract
 pillow
-keras
 tensorflow
 matplotlib

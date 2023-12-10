@@ -1,27 +1,11 @@
 import cv2
 import numpy as np
-import pytesseract
-from PIL import Image
 
-from .neural_net.neural_net import predict, get_model
+from .neural_net.neural_net import pad_image_to_size, predict, get_model, plot_predictions
 
-def ocr(image):
-    text = pytesseract.image_to_string(image)
+def cleanup_image(image: np.ndarray) -> np.ndarray:
     
-    cleaned_text = ""
-    for char in text:
-        if char.isalnum():
-            cleaned_text += char
-    
-    print(f"OCR-Text: \"{cleaned_text}\"")
-    return cleaned_text
-
-def cleanup_image(image):
-    
-    # Konvertierung in Graustufen
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Anwenden eines Schwellenwerts
     _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
 
     masked_image = thresh
@@ -51,52 +35,52 @@ def cleanup_image(image):
     
     return masked_image
 
-def extract_characters(image):
+def extract_characters(image: np.ndarray) -> list[np.ndarray]:
     contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     bounding_boxes = [cv2.boundingRect(contour) for contour in contours]
 
     bounding_boxes.sort(key=lambda x: x[0])
 
     character_images = []
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
+    for x, y, w, h in bounding_boxes:
         # Extract the character using the bounding box
         char_image = image[y:y+h, x:x+w]
-
-        # Determine padding for each side
-        pad_x = max(0, (35 - w) // 2) + 1
-        pad_y = max(0, (35 - h) // 2) + 1
-
-        # Create a new 35x35 image and place the character in the center
-        padded_image = cv2.copyMakeBorder(char_image, top=pad_y, bottom=pad_y, left=pad_x, right=pad_x, borderType=cv2.BORDER_CONSTANT, value=[0, 0, 0])
-        
-        # Resize if the character image is larger than 35x35
-        if padded_image.shape[0] > 35 or padded_image.shape[1] > 35:
-            padded_image = cv2.resize(padded_image, (35, 35), interpolation=cv2.INTER_NEAREST)
-
+        padded_image = pad_image_to_size(char_image)
         character_images.append(padded_image)
 
     return character_images
+
+
+def solve_captcha(image: np.ndarray) -> str:
+    cleaned_image = cleanup_image(image)
+    character_images = extract_characters(cleaned_image)
+
+    chars, confidences = predict(model, np.array(character_images) / 255.0)
+
+    captcha_text = "".join(chars)
+    return captcha_text
 
 image = cv2.imread(R'C:\Projects\Hochschulsport-Bot\src\captcha\captcha.png')
 
 cleaned_image = cleanup_image(image)
 character_images = extract_characters(cleaned_image)
 
-for i, character_image in enumerate(character_images):
-    cv2.imwrite(f"character_{i}.png", character_image)
+# Save the extracted characters by placing them next to each other and saving the image
+character_image = np.hstack(character_images)
+cv2.imwrite("characters.png", character_image)
 
-for i, character_image in enumerate(character_images):
-    print(f"Character {i}:")
-    print(f"Shape: {character_image.shape}")
+X_test = np.array(character_images) / 255.0
+Y_test = np.array(['Y', '2', 'A', 'F', '8', '8'])
 
 model = get_model()
-chars, _ = predict(model, np.array(character_images) / 255.0)
+chars, confidences = predict(model, X_test)
 
-print("Correct characters: Y2AF88")
+print("Correct characters  : Y2AF88")
 
-print(f"Predicted characters: {chars}")
+plot_predictions(X_test, Y_test, chars, confidences)
+
+print(f"Predicted characters: {''.join(chars)}")
+print(f"Confidences: {' '.join([str(round(confidence, 2)) for confidence in confidences])}")
 
 # Speichern des bearbeiteten Bildes
 cv2.imwrite('identified.png', cleaned_image)
-ocr(Image.fromarray(cleaned_image))

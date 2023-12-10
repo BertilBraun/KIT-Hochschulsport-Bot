@@ -3,6 +3,7 @@ import sys
 import time
 import base64
 import argparse
+import numpy as np
 from PIL import Image
 from io import BytesIO
 from selenium import webdriver
@@ -14,13 +15,8 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from config import *
+from src.captcha.captcha import solve_captcha
 
-
-def solve_captcha(captcha_image) -> str:
-    # TODO solve
-    captcha_image.save("captcha.png")
-    return ""
-    
     
 def pre_validate_user_data():
     has_error = False
@@ -127,13 +123,16 @@ def handle_captcha(driver):
     captcha_img_element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#bs_captcha img"))
     )
+    if not AUTOCAPTCHA:
+        return ""
+    
     captcha_img_src = captcha_img_element.get_attribute("src")
     captcha_base64 = captcha_img_src.split(",")[1]
 
     # Dekodieren des Bildes
     captcha_image = Image.open(BytesIO(base64.b64decode(captcha_base64)))
 
-    captcha_text = solve_captcha(captcha_image)
+    captcha_text = solve_captcha(np.array(captcha_image))
 
     print(f"CAPTCHA-Text: {captcha_text}")
     return captcha_text
