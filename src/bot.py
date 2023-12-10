@@ -1,5 +1,6 @@
 import time
 import base64
+import argparse
 from PIL import Image
 from io import BytesIO
 from selenium import webdriver
@@ -130,3 +131,18 @@ def handle_signup(driver, captcha_text):
     submit_button = driver.find_element(By.XPATH, "//input[@type='submit'][@value='kostenpflichtig buchen']")
     if AUTOSUBMIT:
         submit_button.click()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Skript mit -r oder -o starten.")
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-r", "--retry", action="store_true", help="Versuche Anmeldung bis es klappt")
+    group.add_argument("-o", "--once", action="store_true", help="Versuche Anmeldung nur einmal")
+
+    args = parser.parse_args()
+
+    if args.retry:
+        signup_to_course()
+    elif args.once:
+        try_signup_to_course()
