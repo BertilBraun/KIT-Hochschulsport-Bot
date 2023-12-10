@@ -1,15 +1,13 @@
 import os
 import cv2
 import logging
-
-from matplotlib import axes
-from pyparsing import C
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logs
 logging.getLogger("tensorflow").setLevel(logging.ERROR) # Suppress TensorFlow logs
 
 from keras.datasets import mnist
 from keras.models import Sequential, load_model
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.utils import to_categorical
 
 from PIL import Image, ImageDraw, ImageFont
 from fontTools.ttLib import TTFont
@@ -226,19 +224,16 @@ def get_model():
         model = Sequential([
             Conv2D(4, (3, 3), activation='relu', input_shape=(35, 35, 1)),
             MaxPooling2D(2, 2),
-            Conv2D(4, (3, 3), activation='relu'),
+            Conv2D(16, (3, 3), activation='relu'),
             MaxPooling2D(2, 2),
-            Conv2D(4, (3, 3), activation='relu'),
+            Conv2D(32, (3, 3), activation='relu'),
             MaxPooling2D(2, 2),
-            #Conv2D(24, (3, 3), activation='relu'),
-            #MaxPooling2D(2, 2),
             Flatten(),
-            Dense(32, activation='relu'),
-            #Dense(64, activation='relu'),
+            Dense(64, activation='relu'),
             Dense(len(CHARACTERS), activation='softmax')
         ])
 
-        model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
         model.summary()
 
@@ -246,10 +241,12 @@ def get_model():
         
         X, Y = get_training_data(synthetic_size=200000)
         
+        Y = to_categorical(Y, num_classes=len(CHARACTERS))
+        
         print("Done!")
         print(f"Training on {len(X)} images")
 
-        model.fit(X, Y, epochs=10, validation_split=0.1)
+        model.fit(X, Y, epochs=10, validation_split=0.1, batch_size=64)
 
         # Save the model after training
         model.save(MODEL_FILE)
