@@ -29,10 +29,10 @@ Wir rufen den angegebenen Link auf und suchen den Kurs mit der gegebenen Kursnum
 - [x] Automatisches Ausfüllen der Daten
 - [x] Anmeldung automatisch abschicken
 - [ ] Captcha lösen
-- [ ] Make it faaaaaassst as fuck boi
+- [x] Make it faaaaaassst as fuck boi
   - [ ] Faster submitting than timeout allows
 - [x] Automatisches Auswählen des Kurses
-- [ ] Bei Kursvergabe Start, automatisch, schnell, wiederholt versuchen, einen Platz zu bekommen
+- [x] Bei Kursvergabe Start, automatisch, schnell, wiederholt versuchen, einen Platz zu bekommen
 - [ ] Mehrere Kurse gleichzeitig buchen
 - [ ] Prevalidate user information
 - [ ] Improve README.md

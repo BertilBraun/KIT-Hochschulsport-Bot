@@ -20,11 +20,31 @@ def solve_captcha(captcha_image) -> str:
     
     
 def signup_to_course():
+    while True:
+        try:
+            try_signup_to_course()
+            print("Erfolgreich angemeldet!")
+            break
+        except Exception as e:
+            print(e)
+            print("Fehler aufgetreten, versuche es erneut...")
+            time.sleep(1)
+    
+def try_signup_to_course():
         
     # Initialisieren des WebDrivers
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service)
 
+    go_to_signup_page(driver)
+    handle_signup_data(driver)
+    captcha_text = handle_captcha(driver)
+    handle_signup(driver, captcha_text)
+    
+    driver.quit()
+
+def go_to_signup_page(driver):
+    
     # Öffnen einer Webseite
     driver.get(LINK)
 
@@ -45,15 +65,6 @@ def signup_to_course():
     # Wechseln zur neuen Registerkarte
     new_tab = driver.window_handles[1]  # Index 1, da 0 die erste (ursprüngliche) Registerkarte ist
     driver.switch_to.window(new_tab)
-    
-    handle_signup_data(driver)
-    captcha_text = handle_captcha(driver)
-    handle_signup(driver, captcha_text)
-    
-    time.sleep(1000)
-    # Schließen des Browsers
-    driver.quit()
-
     
     
 def handle_signup_data(driver):
