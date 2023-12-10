@@ -1,3 +1,5 @@
+import re
+import sys
 import time
 import base64
 import argparse
@@ -20,6 +22,23 @@ def solve_captcha(captcha_image) -> str:
     return ""
     
     
+def pre_validate_user_data():
+    has_error = False
+    
+    for format, value in zip(
+        [r"[A-Za-z]+", r"[A-Za-z]+", r"[A-Za-z\w]+", r"[0-9]+", r"[0-9]{5}", r"[A-Za-z\w]+", r"[0-9]{6}", r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", r"[A-Z]{2}[0-9]{20}"],
+        [VORNAME, NACHNAME, STRASSE, HAUSNUMMER, PLZ, ORT, MATNUMMER, EMAIL, IBAN]
+    ):
+        if not value:
+            print(f"Fehler: Bitte fülle alle Felder aus!")
+            has_error = True
+        if not re.match(f"^{format}$", value):
+            print(f"Fehler: Ungültiges Format für \"{value}\"! Erwartet: {format}")
+            has_error = True
+            
+    if has_error:
+        sys.exit(1)
+                            
 def signup_to_course():
     while True:
         try:
@@ -141,6 +160,8 @@ if __name__ == "__main__":
     group.add_argument("-o", "--once", action="store_true", help="Versuche Anmeldung nur einmal")
 
     args = parser.parse_args()
+    
+    pre_validate_user_data()
 
     if args.retry:
         signup_to_course()
