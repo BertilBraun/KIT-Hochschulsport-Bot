@@ -88,8 +88,8 @@ def create_synthetic_data(size=5000, image_size=(35, 35), rotation_range=45):# -
         font = random.choice(fonts)
         
         # Approximate centering
-        text_x = (image_size[0] - 28) // 2  # Approximate x position
-        text_y = (image_size[1] - 28) // 2  # Approximate y position
+        text_x = (image_size[0] - random.uniform(28, 32)) // 2  # Approximate x position
+        text_y = (image_size[1] - random.uniform(28, 32)) // 2  # Approximate y position
         draw.text((text_x, text_y), char, 'white', font=font)
         
         img = img.rotate(random.uniform(-rotation_range, rotation_range))
@@ -178,11 +178,7 @@ def predict(model, images):
 
 
 def test_model(model):
-    X_test, Y_test = get_training_data(synthetic_size=60000)
-    indices = np.random.choice(len(X_test), size=200, replace=False)
-    X_test = X_test[indices]
-    Y_test = Y_test[indices]
-        
+    X_test, Y_test = get_training_data(synthetic_size=60000)        
     predicted_labels, confidence_scores = predict(model, X_test)
     
     Y_test = indices_to_labels(Y_test)
@@ -191,6 +187,31 @@ def test_model(model):
     print(f"Correct predictions: {correct_predictions} / {len(Y_test)}")
     print(f"Accuracy: {correct_predictions / len(Y_test) * 100:.2f}%")
     
+    if False:
+        indices = np.random.choice(len(X_test), size=200, replace=False)
+        X_test = X_test[indices]
+        Y_test = Y_test[indices]
+        predicted_labels = predicted_labels[indices]
+        confidence_scores = confidence_scores[indices]
+    else:
+        # choose 10 indices where Y_test in Y2AF8
+        X_final = []
+        Y_final = []
+        predicted_labels_final = []
+        confidence_scores_final = []
+        for label in 'Y2AF8':
+            indices = np.where(Y_test == label)[0]
+            indices = np.random.choice(indices, size=10, replace=False)
+            X_final.append(X_test[indices])
+            Y_final.append(Y_test[indices])
+            predicted_labels_final.append(predicted_labels[indices])
+            confidence_scores_final.append(confidence_scores[indices])
+            
+        X_test = np.concatenate(X_final)
+        Y_test = np.concatenate(Y_final)
+        predicted_labels = np.concatenate(predicted_labels_final)
+        confidence_scores = np.concatenate(confidence_scores_final)
+            
     plot_predictions(X_test, Y_test, predicted_labels, confidence_scores)
         
     
@@ -220,16 +241,19 @@ def get_model():
     if os.path.exists(MODEL_FILE):
         # Load the model from the file
         model = load_model(MODEL_FILE)
+        model.summary()
     else:
         model = Sequential([
             Conv2D(4, (3, 3), activation='relu', input_shape=(35, 35, 1)),
             MaxPooling2D(2, 2),
-            Conv2D(16, (3, 3), activation='relu'),
+            Conv2D(4, (3, 3), activation='relu'),
             MaxPooling2D(2, 2),
-            Conv2D(32, (3, 3), activation='relu'),
-            MaxPooling2D(2, 2),
+            #Conv2D(4, (3, 3), activation='relu'),
+            #MaxPooling2D(2, 2),
+            #Conv2D(32, (3, 3), activation='relu'),
+            #MaxPooling2D(2, 2),
             Flatten(),
-            Dense(64, activation='relu'),
+            Dense(8, activation='relu'),
             Dense(len(CHARACTERS), activation='softmax')
         ])
 
@@ -246,7 +270,7 @@ def get_model():
         print("Done!")
         print(f"Training on {len(X)} images")
 
-        model.fit(X, Y, epochs=10, validation_split=0.1, batch_size=64)
+        model.fit(X, Y, epochs=15, validation_split=0.1, batch_size=64)
 
         # Save the model after training
         model.save(MODEL_FILE)

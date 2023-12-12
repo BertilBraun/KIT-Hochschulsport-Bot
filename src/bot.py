@@ -15,7 +15,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from config import *
-from src.captcha.captcha import solve_captcha
+from captcha.captcha import solve_captcha
 
     
 def pre_validate_user_data():
@@ -64,8 +64,7 @@ def go_to_signup_page(driver):
     # Öffnen einer Webseite
     driver.get(LINK)
 
-    # Verwenden von XPath, um den Kurs mit der Nummer 3700 zu finden
-    kursnummer_xpath = "//td[@class='bs_sknr' and text()='3700']/ancestor::tr//input[@type='submit']"
+    kursnummer_xpath = f"//td[@class='bs_sknr' and text()='{KURSNUMMER}']/ancestor::tr//input[@type='submit']"
     # Warten auf den "Submit"-Button
     submit_button = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, kursnummer_xpath))

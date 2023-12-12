@@ -2,7 +2,7 @@ AUTOSUBMIT = False # Set to True to automatically submit the form after filling 
 AUTOCAPTCHA = False # Set to True to automatically solve the captcha
 
 LINK = "https://buchsys-hsp.ifss.kit.edu/angebote/aktueller_zeitraum/_Judo.html"
-KURSNUMMER = "3700"
+KURSNUMMER = "3701"
 
 GESCHLECHT = "M" # "W" | "M" | "D" | "X"
 VORNAME = "Max"

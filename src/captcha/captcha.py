@@ -60,27 +60,28 @@ def solve_captcha(image: np.ndarray) -> str:
     captcha_text = "".join(chars)
     return captcha_text
 
-image = cv2.imread(R'C:\Projects\Hochschulsport-Bot\src\captcha\captcha.png')
+if __name__ == "__main__":
+    image = cv2.imread(R'C:\Projects\Hochschulsport-Bot\src\captcha\captcha.png')
 
-cleaned_image = cleanup_image(image)
-character_images = extract_characters(cleaned_image)
+    cleaned_image = cleanup_image(image)
+    character_images = extract_characters(cleaned_image)
 
-# Save the extracted characters by placing them next to each other and saving the image
-character_image = np.hstack(character_images)
-cv2.imwrite("characters.png", character_image)
+    # Save the extracted characters by placing them next to each other and saving the image
+    character_image = np.hstack(character_images)
+    cv2.imwrite("characters.png", character_image)
 
-X_test = np.array(character_images) / 255.0
-Y_test = np.array(['Y', '2', 'A', 'F', '8', '8'])
+    X_test = np.array(character_images) / 255.0
+    Y_test = np.array(['Y', '2', 'A', 'F', '8', '8'])
 
-model = get_model()
-chars, confidences = predict(model, X_test)
+    model = get_model()
+    chars, confidences = predict(model, X_test)
 
-print("Correct characters  : Y2AF88")
+    print("Correct characters  : Y2AF88")
 
-plot_predictions(X_test, Y_test, chars, confidences)
+    plot_predictions(X_test, Y_test, chars, confidences)
 
-print(f"Predicted characters: {''.join(chars)}")
-print(f"Confidences: {' '.join([str(round(confidence, 2)) for confidence in confidences])}")
+    print(f"Predicted characters: {''.join(chars)}")
+    print(f"Confidences: {' '.join([str(round(confidence, 2)) for confidence in confidences])}")
 
-# Speichern des bearbeiteten Bildes
-cv2.imwrite('identified.png', cleaned_image)
+    # Speichern des bearbeiteten Bildes
+    cv2.imwrite('identified.png', cleaned_image)
